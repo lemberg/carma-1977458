@@ -23,7 +23,7 @@ class EntityReference_SelectionHandler_Generic_eun extends EntityReference_Selec
     if (class_exists($class_name = 'EntityReference_SelectionHandler_Generic_eun_' . $target_entity_type)) {
       return new $class_name($field, $instance, $entity_type, $entity);
     }
-    
+
     if (class_exists($class_name = 'EntityReference_SelectionHandler_Generic_' . $target_entity_type)) {
       return new $class_name($field, $instance, $entity_type, $entity);
     }
@@ -31,6 +31,7 @@ class EntityReference_SelectionHandler_Generic_eun extends EntityReference_Selec
       return new EntityReference_SelectionHandler_Generic($field, $instance, $entity_type, $entity);
     }
   }
+
 }
 
 /**
@@ -39,6 +40,7 @@ class EntityReference_SelectionHandler_Generic_eun extends EntityReference_Selec
  * This only exists to workaround core bugs.
  */
 class EntityReference_SelectionHandler_Generic_eun_node extends EntityReference_SelectionHandler_Generic_node {
+
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // Adding the 'node_access' tag is sadly insufficient for nodes: core
     // requires us to also know about the concept of 'published' and
@@ -50,4 +52,10 @@ class EntityReference_SelectionHandler_Generic_eun_node extends EntityReference_
       $query->condition("$base_table.status", NODE_PUBLISHED);
     }
   }
+
+  public function getLabel($entity) {
+    $target_type = $this->field['settings']['target_type'];
+    return user_access('reference unpublished nodes') || entity_access('view', $target_type, $entity) ? entity_label($target_type, $entity) : t('- Restricted access -');
+  }
+
 }
